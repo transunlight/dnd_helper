@@ -1,8 +1,5 @@
 use std::io::{self, Write};
 
-use reqwest;
-use scraper;
-
 fn main() {
     let info_selector = scraper::Selector::parse("#page-content > p").unwrap();
     let client = reqwest::blocking::Client::new();
