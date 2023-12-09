@@ -4,12 +4,7 @@ fn main() {
     let info_selector = scraper::Selector::parse("#page-content > p").unwrap();
     let client = reqwest::blocking::Client::new();
 
-    loop {
-        let spell_name = match get_spell_name() {
-            Some(name) => name,
-            None => break,
-        };
-
+    while let Some(spell_name) = get_spell_name() {
         println!("Searching for {spell_name}...");
 
         let url = format!("http://dnd5e.wikidot.com/spell:{spell_name}");
@@ -40,7 +35,7 @@ fn get_spell_name() -> Option<String> {
     io::stdout().flush().unwrap();
 
     io::stdin().read_line(&mut name).unwrap();
-    name = name.trim().replace(" ", "-");
+    name = name.trim().replace(' ', "-");
 
     if name.is_empty() {
         None
