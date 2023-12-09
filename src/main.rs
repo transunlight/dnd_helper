@@ -18,11 +18,10 @@ fn main() {
         let url = format!("http://dnd5e.wikidot.com/spell:{spell_name}");
 
         let response = client.get(&url).send().unwrap();
-        assert_eq!(
-            response.status(),
-            reqwest::StatusCode::OK,
-            "Did not find {spell_name}"
-        );
+        if response.status() != reqwest::StatusCode::OK {
+            println!("Could not find {spell_name}.");
+            continue;
+        }
 
         let document = scraper::Html::parse_document(&(response.text().unwrap()));
 
