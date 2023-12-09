@@ -5,16 +5,14 @@ use scraper;
 
 fn main() {
     let info_selector = scraper::Selector::parse("#page-content > p").unwrap();
-    let mut spell_name = String::new();
     let client = reqwest::blocking::Client::new();
 
     loop {
-        spell_name.clear();
+        let spell_name = match get_spell_name() {
+            Some(name) => name,
+            None => break,
+        };
 
-        print!("Enter the name of the spell: ");
-        io::stdout().flush().unwrap();
-        io::stdin().read_line(&mut spell_name).unwrap();
-        spell_name = spell_name.replace(" ", "-");
         println!("Searching for {spell_name}...");
 
         let url = format!("http://dnd5e.wikidot.com/spell:{spell_name}");
@@ -36,5 +34,21 @@ fn main() {
             "Raw spell info: {:#?}",
             (&raw_spell_info[3..raw_spell_info.len() - 1])
         );
+    }
+}
+
+fn get_spell_name() -> Option<String> {
+    let mut name = String::new();
+
+    print!("Enter the name of the spell: ");
+    io::stdout().flush().unwrap();
+
+    io::stdin().read_line(&mut name).unwrap();
+    name = name.trim().replace(" ", "-");
+
+    if name.is_empty() {
+        None
+    } else {
+        Some(name)
     }
 }
