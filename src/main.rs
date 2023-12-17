@@ -1,7 +1,9 @@
 use std::io::{self, Write};
 
+use scraper::Selector;
+
 fn main() {
-    let info_selector = scraper::Selector::parse("#page-content > p").unwrap();
+    let info_selector = Selector::parse("#page-content > *").unwrap();
     let client = reqwest::blocking::Client::new();
 
     while let Some(spell_name) = get_spell_name() {
@@ -9,7 +11,14 @@ fn main() {
 
         let url = format!("http://dnd5e.wikidot.com/spell:{spell_name}");
 
-        let response = client.get(&url).send().unwrap();
+        let response = match client.get(&url).send() {
+            Ok(res) => res,
+            Err(err) => {
+                eprintln!("{}", err);
+                continue;
+            }
+        };
+
         if response.status() != reqwest::StatusCode::OK {
             println!("Could not find {spell_name}.");
             continue;
@@ -19,13 +28,15 @@ fn main() {
 
         let raw_spell_info: Vec<_> = document
             .select(&info_selector)
-            .map(|element| element.text().collect::<Vec<_>>())
+            .flat_map(|element| element.text())
+            .map(|text| text.trim())
+            .filter(|text| !text.is_empty())
             .collect();
-        println!(
-            "Raw spell info: {:#?}",
-            (&raw_spell_info[3..raw_spell_info.len() - 1])
-        );
+
+        println!("Raw spell info: {:#?}", (&raw_spell_info));
     }
+
+    println!("Closing...");
 }
 
 fn get_spell_name() -> Option<String> {
