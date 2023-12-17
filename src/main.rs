@@ -3,6 +3,8 @@ use std::io::{self, Write};
 use reqwest::blocking::{Client, Response};
 use scraper::Selector;
 
+use dnd_helper::Spell;
+
 fn main() {
     let info_selector = Selector::parse("#page-content > *").unwrap();
     let client = Client::new();
@@ -28,6 +30,9 @@ fn main() {
             .collect();
 
         println!("Raw spell info: {:#?}", (&raw_spell_info));
+
+        let spell = Spell::from_raw_vector(spell_name, raw_spell_info);
+        println!("Spell struct: {:#?}", spell);
     }
 
     println!("Closing...");
