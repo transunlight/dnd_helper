@@ -2,6 +2,7 @@
 
 use std::str::FromStr;
 
+use scraper::{Html, Selector};
 use strum::EnumString;
 
 #[derive(Debug, EnumString)]
@@ -135,5 +136,20 @@ impl Spell {
             range,
             duration,
         }
+    }
+
+    pub fn from_spell_document(name: String, document: Html) -> Spell {
+        let info_selector = Selector::parse("#page-content > *").unwrap();
+
+        let raw_info: Vec<_> = document
+            .select(&info_selector)
+            .flat_map(|element| element.text())
+            .map(|text| text.trim())
+            .filter(|text| !text.is_empty())
+            .collect();
+
+        println!("Raw spell info: {:#?}", (&raw_info));
+
+        Spell::from_raw_vector(name, raw_info)
     }
 }

@@ -1,12 +1,11 @@
 use std::io::{self, Write};
 
 use reqwest::blocking::{Client, Response};
-use scraper::Selector;
+use scraper::Html;
 
 use dnd_helper::Spell;
 
 fn main() {
-    let info_selector = Selector::parse("#page-content > *").unwrap();
     let client = Client::new();
 
     while let Some(spell_name) = get_spell_name() {
@@ -20,18 +19,9 @@ fn main() {
             }
         };
 
-        let document = scraper::Html::parse_document(response.text().unwrap().as_str());
+        let document = Html::parse_document(response.text().unwrap().as_str());
+        let spell = Spell::from_spell_document(spell_name, document);
 
-        let raw_spell_info: Vec<_> = document
-            .select(&info_selector)
-            .flat_map(|element| element.text())
-            .map(|text| text.trim())
-            .filter(|text| !text.is_empty())
-            .collect();
-
-        println!("Raw spell info: {:#?}", (&raw_spell_info));
-
-        let spell = Spell::from_raw_vector(spell_name, raw_spell_info);
         println!("Spell struct: {:#?}", spell);
     }
 
