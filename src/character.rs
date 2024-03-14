@@ -1,12 +1,10 @@
-use std::collections::HashSet;
-
 #[derive(Debug)]
 pub struct Character {
     pub name: String,
     pub class: ClassLevels,
     pub attributes: Attributes,
     pub prof_bonus: i8,
-    pub skill_prof: HashSet<Skill>,
+    pub skill_prof: SkillProficiencies,
 }
 
 impl Character {
@@ -23,7 +21,7 @@ impl Character {
             ),
             attributes: Attributes::new([8, 14, 18, 20, 16, 14]),
             prof_bonus: 2,
-            skill_prof: HashSet::default(),
+            skill_prof: SkillProficiencies::default(),
         }
     }
 }
@@ -80,9 +78,12 @@ mod attribute {
 use attribute::Attributes;
 
 mod skill {
+    use enum_map::Enum;
     use strum::Display;
 
-    #[derive(Debug, Display)]
+    use crate::utils::MyEnumMap;
+
+    #[derive(Debug, Display, Enum, PartialEq, Eq, Hash)]
     pub enum Skill {
         Acrobatics,
         Athletics,
@@ -104,14 +105,32 @@ mod skill {
         Persuasion,
     }
 
-    #[allow(dead_code)]
+    #[derive(Debug, Default, PartialEq, Eq, Clone, Copy)]
     pub enum SkillLevel {
+        #[default]
         Untrained,
         Proficient,
         Expert,
     }
+
+    pub type SkillProficiencies = MyEnumMap<Skill, SkillLevel>;
+
+    impl<'a> SkillProficiencies {
+        pub fn get_proficient(&'a self) -> impl Iterator<Item = Skill> + 'a {
+            self.get(SkillLevel::Proficient)
+        }
+
+        pub fn get_expert(&'a self) -> impl Iterator<Item = Skill> + 'a {
+            self.get(SkillLevel::Expert)
+        }
+
+        fn get(&'a self, level_filter: SkillLevel) -> impl Iterator<Item = Skill> + 'a {
+            self.iter()
+                .filter_map(move |(skill, &level)| (level == level_filter).then_some(skill))
+        }
+    }
 }
-use skill::Skill;
+use skill::SkillProficiencies;
 
 mod class {
     use std::collections::HashMap;

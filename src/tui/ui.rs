@@ -95,7 +95,7 @@ fn render_proficiencies(f: &mut Frame, area: Rect, character: &Character) {
 
     let rows = character
         .skill_prof
-        .iter()
+        .get_proficient()
         .map(|skill| Row::new(vec![skill.to_string(), character.prof_bonus.to_string()]));
 
     let attributes = Table::new(rows, widths).header(header).block(
