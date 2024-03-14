@@ -67,18 +67,18 @@ fn render_main(f: &mut Frame, area: Rect, app: &App) {
 }
 
 fn render_attributes(f: &mut Frame, area: Rect, character: &Character) {
-    let header = Row::new(vec!["Attribute", "Score", "Save"]).bold();
+    let header = Row::new(vec!["Attribute", "Score", "Mod"]).bold();
     let widths = [
         Constraint::Length(15),
         Constraint::Length(5),
-        Constraint::Length(5),
+        Constraint::Length(3),
     ];
 
     let rows = character.attributes.iter().map(|(attr, val)| {
-        Row::new(vec![
+        Row::new([
             attr.to_string(),
-            val.score.to_string(),
-            val.modifier().to_string(),
+            format!("{:^5}", val.score),
+            format!("{:^+3}", val.modifier()),
         ])
     });
 
