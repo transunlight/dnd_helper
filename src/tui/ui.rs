@@ -2,6 +2,7 @@ use ratatui::prelude::*;
 use ratatui::widgets::{Block, Borders, Paragraph, Row, Table};
 
 use crate::app::App;
+use crate::character::Character;
 
 pub fn render(frame: &mut Frame, app: &App) {
     let chunks = Layout::default()
@@ -13,14 +14,17 @@ pub fn render(frame: &mut Frame, app: &App) {
         ])
         .split(frame.size());
 
-    render_header(frame, chunks[0]);
-    render_main(frame, chunks[1]);
+    render_header(frame, chunks[0], &app.current_character);
+    render_main(frame, chunks[1], app);
     render_footer(frame, chunks[2]);
 }
 
-fn render_header(f: &mut Frame, area: Rect) {
+fn render_header(f: &mut Frame, area: Rect, maybe_character: &Option<Character>) {
     let header = Paragraph::new(Line::styled(
-        "Altaea: Artificer 1/Order of Scribes Wizard 3",
+        match maybe_character {
+            None => "No character chosen".into(),
+            Some(character) => character.identity(),
+        },
         Style::default().fg(Color::Red),
     ))
     .block(Block::default().borders(Borders::ALL));
@@ -41,7 +45,7 @@ fn render_footer(f: &mut Frame, area: Rect) {
     f.render_widget(footer, area);
 }
 
-fn render_main(f: &mut Frame, area: Rect) {
+fn render_main(f: &mut Frame, area: Rect, app: &App) {
     let chunks = Layout::default()
         .direction(Direction::Horizontal)
         .constraints([Constraint::Percentage(25), Constraint::Min(1)])
@@ -56,25 +60,27 @@ fn render_main(f: &mut Frame, area: Rect) {
         ])
         .split(chunks[0]);
 
-    render_attributes(f, chunks_0[0]);
-    render_proficiencies(f, chunks_0[1]);
+    if let Some(character) = &app.current_character {
+        render_attributes(f, chunks_0[0], character);
+        render_proficiencies(f, chunks_0[1], character);
+    }
 }
 
-fn render_attributes(f: &mut Frame, area: Rect) {
+fn render_attributes(f: &mut Frame, area: Rect, character: &Character) {
     let header = Row::new(vec!["Attribute", "Score", "Save"]).bold();
-    let rows = [
-        Row::new(vec!["Strength", "8", "-1"]),
-        Row::new(vec!["Dexterity", "14", "+2"]),
-        Row::new(vec!["Constitution", "18", "+6"]),
-        Row::new(vec!["Intelligence", "20", "+7"]),
-        Row::new(vec!["Wisdom", "14", "+2"]),
-        Row::new(vec!["Charisma", "8", "-1"]),
-    ];
     let widths = [
         Constraint::Length(15),
         Constraint::Length(5),
         Constraint::Length(5),
     ];
+
+    let rows = character.attributes.iter().map(|(attr, val)| {
+        Row::new(vec![
+            attr.to_string(),
+            val.score.to_string(),
+            val.modifier().to_string(),
+        ])
+    });
 
     let attributes = Table::new(rows, widths)
         .header(header)
@@ -83,16 +89,14 @@ fn render_attributes(f: &mut Frame, area: Rect) {
     f.render_widget(attributes, area);
 }
 
-fn render_proficiencies(f: &mut Frame, area: Rect) {
+fn render_proficiencies(f: &mut Frame, area: Rect, character: &Character) {
     let header = Row::new(vec!["Skill", "Bonus"]).bold();
-    let rows = [
-        Row::new(vec!["Arcana", "+2"]),
-        Row::new(vec!["History", "+2"]),
-        Row::new(vec!["Investigation", "+2"]),
-        Row::new(vec!["Perception", "+2"]),
-        Row::new(vec!["Insight", "+2"]),
-    ];
     let widths = [Constraint::Length(15), Constraint::Length(5)];
+
+    let rows = character
+        .skill_prof
+        .iter()
+        .map(|skill| Row::new(vec![skill.to_string(), character.prof_bonus.to_string()]));
 
     let attributes = Table::new(rows, widths).header(header).block(
         Block::default()
