@@ -1,6 +1,6 @@
 use log::warn;
 
-use crate::tui::Event;
+use crate::{character::Character, tui::Event};
 
 pub mod update;
 use update::Action;
@@ -15,11 +15,17 @@ pub enum CurrentScreen {
 pub struct App {
     pub should_quit: bool,
     pub current_screen: CurrentScreen,
+    pub current_character: Option<Character>,
 }
 
 impl App {
     pub fn new() -> Self {
-        Self::default()
+        Self::default().load_character()
+    }
+
+    pub fn load_character(mut self) -> Self {
+        self.current_character = Some(Character::create_altaea());
+        self
     }
 
     pub fn tick(&self) {}
