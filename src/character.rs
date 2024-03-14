@@ -1,12 +1,10 @@
 use std::collections::HashSet;
 
-use enum_map::EnumMap;
-
 #[derive(Debug)]
 pub struct Character {
     pub name: String,
     pub class: ClassLevels,
-    pub attributes: EnumMap<Attribute, AttrVal>,
+    pub attributes: Attributes,
     pub prof_bonus: i8,
     pub skill_prof: HashSet<Skill>,
 }
@@ -23,7 +21,7 @@ impl Character {
                 "Artificer",
                 [("Artificer", 1), ("Wizard (Order of Scribes)", 3)],
             ),
-            attributes: EnumMap::default(),
+            attributes: Attributes::new([8, 14, 18, 20, 16, 14]),
             prof_bonus: 2,
             skill_prof: HashSet::default(),
         }
@@ -31,8 +29,26 @@ impl Character {
 }
 
 mod attribute {
-    use enum_map::Enum;
+    use enum_map::{enum_map, Enum};
     use strum::Display;
+
+    use crate::utils::MyEnumMap;
+
+    pub type Attributes = MyEnumMap<Attribute, AttrVal>;
+
+    impl Attributes {
+        pub fn new(scores: [i8; 6]) -> Self {
+            enum_map! {
+                Attribute::Strength => scores[0].into(),
+                Attribute::Dexterity => scores[1].into(),
+                Attribute::Constitution => scores[2].into(),
+                Attribute::Intelligence => scores[3].into(),
+                Attribute::Wisdom => scores[4].into(),
+                Attribute::Charisma => scores[5].into(),
+            }
+            .into()
+        }
+    }
 
     #[derive(Debug, Enum, Display)]
     pub enum Attribute {
@@ -61,7 +77,7 @@ mod attribute {
         }
     }
 }
-use attribute::{AttrVal, Attribute};
+use attribute::Attributes;
 
 mod skill {
     use strum::Display;
