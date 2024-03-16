@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-color-eyre = "0.6.2"
+color-eyre = "0.6.3"
 crossterm = { version = "0.27.0", features = ["event-stream"] }
 enum-map = "2.7.3"
 flexi_logger = "0.27.4"
@@ -14,6 +14,6 @@ futures = "0.3.30"
 log = "0.4.21"
 ratatui = "0.26.1"
 regex = "1.10.3"
-strum = { version = "0.26.1", features = ["derive"] }
+strum = { version = "0.26.2", features = ["derive"] }
 tokio = { version = "1.36.0", features = ["full"] }
 tokio-util = "0.7.10"
