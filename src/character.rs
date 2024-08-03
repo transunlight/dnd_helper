@@ -28,8 +28,7 @@ impl Character {
 
 mod attribute {
     use delegate::delegate;
-    use enum_map::{enum_map, Enum, EnumMap};
-    use strum::Display;
+    use enum_map::{enum_map, EnumMap};
 
     #[derive(Debug)]
     pub struct Attributes(EnumMap<Attribute, AttrVal>);
@@ -53,7 +52,7 @@ mod attribute {
         }
     }
 
-    #[derive(Debug, Enum, Display)]
+    #[derive(Debug, enum_map::Enum, strum::Display)]
     pub enum Attribute {
         Strength,
         Dexterity,
@@ -84,10 +83,9 @@ use attribute::Attributes;
 
 mod skill {
     use delegate::delegate;
-    use enum_map::{Enum, EnumMap};
-    use strum::Display;
+    use enum_map::EnumMap;
 
-    #[derive(Debug, Display, Enum, PartialEq, Eq, Hash)]
+    #[derive(Debug, strum::Display, enum_map::Enum, PartialEq, Eq, Hash)]
     pub enum Skill {
         Acrobatics,
         Athletics,
