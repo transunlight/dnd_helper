@@ -27,24 +27,29 @@ impl Character {
 }
 
 mod attribute {
-    use enum_map::{enum_map, Enum};
+    use delegate::delegate;
+    use enum_map::{enum_map, Enum, EnumMap};
     use strum::Display;
 
-    use crate::utils::MyEnumMap;
-
-    pub type Attributes = MyEnumMap<Attribute, AttrVal>;
+    #[derive(Debug)]
+    pub struct Attributes(EnumMap<Attribute, AttrVal>);
 
     impl Attributes {
         pub fn new(scores: [i8; 6]) -> Self {
-            enum_map! {
+            Self(enum_map! {
                 Attribute::Strength => scores[0].into(),
                 Attribute::Dexterity => scores[1].into(),
                 Attribute::Constitution => scores[2].into(),
                 Attribute::Intelligence => scores[3].into(),
                 Attribute::Wisdom => scores[4].into(),
                 Attribute::Charisma => scores[5].into(),
+            })
+        }
+
+        delegate! {
+            to self.0 {
+                pub fn iter(&self) -> enum_map::Iter<Attribute, AttrVal>;
             }
-            .into()
         }
     }
 
@@ -78,10 +83,9 @@ mod attribute {
 use attribute::Attributes;
 
 mod skill {
-    use enum_map::Enum;
+    use delegate::delegate;
+    use enum_map::{Enum, EnumMap};
     use strum::Display;
-
-    use crate::utils::MyEnumMap;
 
     #[derive(Debug, Display, Enum, PartialEq, Eq, Hash)]
     pub enum Skill {
@@ -113,7 +117,8 @@ mod skill {
         Expert,
     }
 
-    pub type SkillProficiencies = MyEnumMap<Skill, SkillLevel>;
+    #[derive(Debug, Default)]
+    pub struct SkillProficiencies(EnumMap<Skill, SkillLevel>);
 
     impl<'a> SkillProficiencies {
         pub fn get_proficient(&'a self) -> impl Iterator<Item = Skill> + 'a {
@@ -127,6 +132,12 @@ mod skill {
         fn get(&'a self, level_filter: SkillLevel) -> impl Iterator<Item = Skill> + 'a {
             self.iter()
                 .filter_map(move |(skill, &level)| (level == level_filter).then_some(skill))
+        }
+
+        delegate! {
+            to self.0 {
+                pub fn iter(&self) -> enum_map::Iter<Skill, SkillLevel>;
+            }
         }
     }
 }
