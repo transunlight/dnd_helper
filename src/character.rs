@@ -58,7 +58,7 @@ mod attribute {
         Charisma,
     }
 
-    #[derive(Debug, Default)]
+    #[derive(Debug)]
     pub struct AttrVal {
         pub score: i8,
     }
