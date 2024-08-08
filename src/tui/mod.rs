@@ -35,7 +35,9 @@ impl Tui {
 
         let panic_hook = panic::take_hook();
         panic::set_hook(Box::new(move |panic| {
-            Self::reset().expect("failed to reset the terminal");
+            if let Err(err) = Self::reset() {
+                eprintln!("{err}")
+            };
             panic_hook(panic);
         }));
 
