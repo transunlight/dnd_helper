@@ -38,10 +38,8 @@ mod event_def {
 pub use event_def::Event;
 
 pub struct EventHandler {
-    #[allow(dead_code)]
     sender: UnboundedSender<Event>,
     receiver: UnboundedReceiver<Event>,
-    #[allow(dead_code)]
     handle: Option<JoinHandle<()>>,
 }
 
