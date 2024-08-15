@@ -9,7 +9,7 @@ pub struct Character {
 
 impl Character {
     pub fn identity(&self) -> String {
-        format!("{}: {}", self.name, self.class.to_string())
+        format!("{}: {}", self.name, self.class)
     }
 
     pub fn create_altaea() -> Self {
@@ -142,7 +142,7 @@ mod skill {
 use skill::SkillProficiencies;
 
 mod class {
-    use std::collections::HashMap;
+    use std::{collections::HashMap, fmt};
 
     use regex::Regex;
 
@@ -158,16 +158,22 @@ mod class {
         class_levels: HashMap<String, ClassInfo>,
     }
 
-    impl ToString for ClassLevels {
-        fn to_string(&self) -> String {
+    impl fmt::Display for ClassLevels {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            if let Some(info) = self.class_levels.get(&self.base_class) {
+                match &info.subclass {
+                    Some(subclass) => write!(f, "{} {} {}", subclass, self.base_class, info.levels),
+                    None => write!(f, "{} {}", self.base_class, info.levels),
+                }?;
+            };
+
             self.class_levels
                 .iter()
-                .map(|(key, info)| match &info.subclass {
-                    Some(subclass) => format!("{} {} {}", subclass, key, info.levels),
-                    None => format!("{} {}", key, info.levels),
+                .filter(|&(class, _)| class != &self.base_class)
+                .try_for_each(|(class, info)| match &info.subclass {
+                    Some(subclass) => write!(f, " / {} {} {}", subclass, class, info.levels),
+                    None => write!(f, " / {} {}", class, info.levels),
                 })
-                .collect::<Vec<_>>()
-                .join("/")
         }
     }
 
